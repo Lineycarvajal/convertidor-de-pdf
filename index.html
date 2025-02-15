@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Convertir a PDF</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 20px;
+    }
+
+    #file-input {
+      margin-bottom: 10px;
+    }
+
+    #convert-button, #export-button {
+      margin-top: 10px;
+    }
+
+    #output {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Convertir a PDF</h1>
+  <input type="file" id="file-input" accept=".docx, .jpeg, .png"><br>
+  <button type="button" id="convert-button">Convertir</button>
+  <button type="button" id="export-button">Exportar</button>
+  <div id="output"></div>
+  <script>
+    document.getElementById('convert-button').addEventListener('click', function() {
+      const fileInput = document.getElementById('file-input');
+      const file = fileInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const data = e.target.result;
+          const output = document.getElementById('output');
+          output.innerHTML = '';
+          if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+            // Convert Word document to PDF
+            // Note: This requires a library like docxtemplater or similar to convert Word documents to PDF
+            // For the purpose of this example, we will assume the conversion is successful
+            const pdf = convertWordToPdf(data);
+            output.innerHTML = `<a href="${pdf}" download="converted.pdf">Descargar PDF</a>`;
+          } else if (file.type === 'image/jpeg' || file.type === 'image/png') {
+            // Convert image to PDF
+            const img = new Image();
+            img.src = data;
+            img.onload = function() {
+              const canvas = document.createElement('canvas');
+              canvas.width = img.width;
+              canvas.height = img.height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0);
+              const pdf = new jsPDF();
+              pdf.addImage(canvas.toDataURL('image/jpeg'), 'JPEG', 0, 0, 210, 297);
+              const pdfData = pdf.output('blob');
+              const url = URL.createObjectURL(pdfData);
+              output.innerHTML = `<a href="${url}" download="converted.pdf">Descargar PDF</a>`;
+            };
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }
+    });
+
+    document.getElementById('export-button').addEventListener('click', function() {
+      const output = document.getElementById('output');
+      const a = document.createElement('a');
+      a.href = output.querySelector('a').href;
+      a.download = 'converted.pdf';
+      a.click();
+    });
+
+    function convertWordToPdf(data) {
+      // This is a placeholder function for converting Word documents to PDF
+      // In a real application, you would use a library like docxtemplater or similar
+      // For the purpose of this example, we will assume the conversion is successful
+      return 'converted.pdf';
+    }
+  </script>
+</body>
+</html>
